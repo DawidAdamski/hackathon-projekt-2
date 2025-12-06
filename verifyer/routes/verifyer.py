@@ -1,15 +1,19 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from services.storage import TokenStorage
+
+from main import get_token_storage
 
 router = APIRouter()
 
-LEGIT_DOMAIN = "http://127.0.0.1:8888"
-
 # Lista zaufanych domen
-TRUSTED_DOMAINS = [LEGIT_DOMAIN]
+TRUSTED_DOMAINS = [
+    "datki.gov",
+    "podatki.gov",
+    "wydatki.gov",
+]
 
 
-# Model danych dla sesji weryfikacyjnej
 class VerifySessionRequest(BaseModel):
     url: str
     service_id: str
@@ -17,17 +21,48 @@ class VerifySessionRequest(BaseModel):
 
 # Endpoint do tworzenia akcji weryfikacyjnych
 @router.post("/session")
-async def create_verify_session(request: VerifySessionRequest, req: Request):
-    # Pobierz nagłówek Host
-    origin = req.headers.get("origin")
+async def create_verify_session(
+    request: VerifySessionRequest,
+    req: Request,
+    storage=Depends(get_token_storage),
+):
 
-    # Sprawdź, czy domena jest zaufana
+    # CHECK 1: Czy w domenie .gov ?
+    origin = req.headers.get("host", "")
+    if origin.endswith(".gov") is False:
+        raise HTTPException(status_code=403, detail="Domain is not .gov")
+
+    # CHECK 2: Czy w zaufanych domenach?
     if origin not in TRUSTED_DOMAINS:
-        raise HTTPException(status_code=403, detail="Untrusted domain")
+        raise HTTPException(status_code=403, detail=f"{req.headers.items()}")
 
     # Generowanie sesji weryfikacyjnej (symulacja)
+    # 1. QRCOD nonce ma byc wygenerowany po stronie backednu
+    import time
+    from uuid import uuid4
+
+    # 1 I NEED TO GENERATE NONCE TOKEN
+    nonce = uuid4()
+    SESSIONS[nonce] = {
+        "status": "pending",
+        "created_at": time.time(),
+        "ttl": 30,  # sekund – to możesz ustawić dowolnie
+        "url": url,
+        "service_id": service_id,
+    }
+
+    # 2. Ma miec TTL
+    # 3. Bacnekd ma miec informacje przez jaka strone zostal wygenerowny ten QRCode - dla jakiej domeny
     nonce = "example_nonce"
     qr_payload = f"moby-sim://verify?nonce={nonce}"
+    # Kod QR generowany po stronie FrontEnd i jest graficzna reprezentacja stringa ktory zwracam mu z backendu
+
+    # 4. Wysylasz ten QR code fo front serwera
+    # i wyswietlasz w przegladace
+    # 5. To ma zeskanowac user - zasymuluj to
+    # 6. na potrzeby moka wysweitl do skopiowania kod
+    #
+    #
 
     return {"nonce": nonce, "qr_payload": qr_payload}
 

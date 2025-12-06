@@ -1,0 +1,22 @@
+services:
+  verifier:
+    build: ./verifier
+    container_name: verifier
+    ports:
+      - "8000:8000"
+
+  legit-front:
+    build: ./legi-front
+    container_name: fake-gov-mock-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  fake-front:
+    build: ./fake-front
+    container_name: gov-mock-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

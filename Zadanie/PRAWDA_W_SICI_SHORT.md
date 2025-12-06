@@ -32,3 +32,12 @@ potwierdzający wynik weryfikacji. Scenariusz pozytywny: jasny komunikat „Stro
 jest zaufana” i ewentualne wskazówki do dalszego korzystania. Scenariusz
 negatywny: wyraźne ostrzeżenie wraz z instrukcją, co należy zrobić w przypadku
 potencjalnego zagrożenia
+
+## Schemat
+
+gdzie generowac qr kod?
+
+- w backendzie w govpl
+- qr trafia na fe do usera na przegladarke
+- potem skan QRkodu
+- user skanuje i wysyla POST 

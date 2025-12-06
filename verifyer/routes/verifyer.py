@@ -1,10 +1,7 @@
-from typing import List
-
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-app = FastAPI()
+router = APIRouter()
 
 # Lista zaufanych domen
 TRUSTED_DOMAINS = ["podatki.gov.local"]
@@ -16,8 +13,8 @@ class VerifySessionRequest(BaseModel):
     service_id: str
 
 
-# Endpoint do tworzenia sesji weryfikacyjnych
-@app.post("/verify/session")
+# Endpoint do tworzenia akcji weryfikacyjnych
+@router.post("/session")
 async def create_verify_session(request: VerifySessionRequest, req: Request):
     # Pobierz nagłówek Host
     host = req.headers.get("host")
@@ -34,7 +31,7 @@ async def create_verify_session(request: VerifySessionRequest, req: Request):
 
 
 # Endpoint do sprawdzania wyniku weryfikacji
-@app.get("/verify/result")
+@router.get("/result")
 async def get_verify_result(nonce: str):
     # Symulacja wyniku weryfikacji
     if nonce == "example_nonce":
@@ -43,7 +40,6 @@ async def get_verify_result(nonce: str):
         return {"status": "untrusted"}
 
 
-# Endpoint do sprawdzania wyniku weryfikacji
-@app.get("/")
-async def test_connection():
-    return {"status": "verifier is running"}
+@router.get("/test")
+async def get_test():
+    return {"status": "router ok"}

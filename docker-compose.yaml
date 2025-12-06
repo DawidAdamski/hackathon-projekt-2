@@ -22,9 +22,10 @@ services:
       - ./legit-front/index.html:/usr/share/nginx/html/index.html
 
   verifier:
-    build: ./verifier
-    container_name: verifier
+    build: ./verifyer
+    container_name: verifyer
     ports:
       - "8000:8000"
     volumes:
-      - ./verifier/:/verifier
+      - ./verifyer:/verifyer
+    command: ["./entrypoint.sh"]

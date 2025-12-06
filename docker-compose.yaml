@@ -9,6 +9,8 @@ services:
     volumes:
       - ./fake-front/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./fake-front/index.html:/usr/share/nginx/html/index.html
+      - ./legit-front/script.js:/usr/share/nginx/html/script.js
+      - ./legit-front/styles.css:/usr/share/nginx/html/styles.css
 
   legit-front:
     build: ./legit-front
@@ -20,6 +22,8 @@ services:
     volumes:
       - ./legit-front/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./legit-front/index.html:/usr/share/nginx/html/index.html
+      - ./legit-front/script.js:/usr/share/nginx/html/script.js
+      - ./legit-front/styles.css:/usr/share/nginx/html/styles.css
 
   verifier:
     build: ./verifyer

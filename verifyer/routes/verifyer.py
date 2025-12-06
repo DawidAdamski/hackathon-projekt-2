@@ -3,8 +3,10 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
+LEGIT_DOMAIN = "http://127.0.0.1:8888"
+
 # Lista zaufanych domen
-TRUSTED_DOMAINS = ["podatki.gov.local"]
+TRUSTED_DOMAINS = [LEGIT_DOMAIN]
 
 
 # Model danych dla sesji weryfikacyjnej
@@ -17,10 +19,10 @@ class VerifySessionRequest(BaseModel):
 @router.post("/session")
 async def create_verify_session(request: VerifySessionRequest, req: Request):
     # Pobierz nagłówek Host
-    host = req.headers.get("host")
+    origin = req.headers.get("origin")
 
     # Sprawdź, czy domena jest zaufana
-    if host not in TRUSTED_DOMAINS:
+    if origin not in TRUSTED_DOMAINS:
         raise HTTPException(status_code=403, detail="Untrusted domain")
 
     # Generowanie sesji weryfikacyjnej (symulacja)

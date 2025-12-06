@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <title>gov-pl.info – Rozliczenie podatku (fake)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- QR library -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+      defer
+    ></script>
+    <script src="script.js" defer></script>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <strong class="logo-text">gov-pl.info</strong>
+        <span class="topbar-tagline">Serwis informacyjny o podatkach</span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <h1>Usługa: Szybkie rozliczenie podatku online</h1>
+        <p>
+          Ta strona <em>symuluje</em> serwis związany z usługami podatkowymi.
+          Wygląda podobnie do oficjalnych stron administracji, ale nie jest ich
+          częścią. Poniżej znajduje się moduł weryfikacji strony za pomocą
+          aplikacji <strong>mObywatel</strong>.
+        </p>
+
+        <div
+          class="verify-box"
+          id="moby-verify"
+          data-service-id="TAX-PL-FAKE"
+          data-api-url=""
+        >
+          <button type="button" id="moby-verify-btn">
+            Zweryfikuj tę stronę w mObywatel
+          </button>
+
+          <div id="moby-verify-qr">
+            <span class="hint">
+              Po kliknięciu przycisku tutaj pojawi się jednorazowy kod QR do
+              weryfikacji tej strony.
+            </span>
+          </div>
+
+          <div id="moby-verify-status" class="hint"></div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

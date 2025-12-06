@@ -1,0 +1,98 @@
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  margin: 0;
+  background: #f5f5f5;
+}
+
+.topbar {
+  background: #f54927;
+  color: #fff;
+  padding: 1rem 2rem;
+}
+
+.topbar strong {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.container {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+}
+
+.card h1 {
+  margin-top: 0;
+  font-size: 1.4rem;
+}
+
+.card p {
+  line-height: 1.5;
+}
+
+.verify-box {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+#moby-verify-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  border: none;
+  background: #004e9a;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#moby-verify-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#moby-verify-qr {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px dashed #ccc;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #fafafa;
+}
+
+#moby-verify-status {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.status-ok {
+  color: #0b7a2a;
+  font-weight: 600;
+}
+
+.status-warn {
+  color: #b00020;
+  font-weight: 600;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #666;
+}

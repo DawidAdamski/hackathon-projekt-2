@@ -1,9 +1,6 @@
-# Legit Front – legitna gov-strona
+# Fake Front – fałszywa “gov” strona
 
-- np. `https://podatki.gov.local`
-- ma przycisk „Zweryfikuj stronę w mObywatel”
-- po kliknięciu:
-  - robi `POST /verify/session` do Verifiera,
-  - dostaje `nonce` + `qr_payload`,
-  - pokazuje QR (albo chociaż tekst `mobywatel://verify?nonce=...`),
-  - zaczyna polling `/verify/result?nonce=...`.
+- np. `https://podatki-gov-pl.info.local`
+- UI prawie taki sam,
+- ten sam flow z przyciskiem i QR,
+- ale backend na podstawie **URL**/domeny rozpoznaje, że to _nie_ jest zaufana strona.

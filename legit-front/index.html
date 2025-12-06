@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <title>gov.pl – Usługa podatkowa (fake)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- QR library -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+      defer
+    ></script>
+    <script src="script.js" defer></script>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <strong>gov.pl</strong> – Serwis Rzeczypospolitej Polskiej (mock)
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <h1>Usługa: Rozliczenie podatku dochodowego (mock)</h1>
+        <p>
+          Ta strona symuluje oficjalny serwis administracji publicznej w domenie
+          gov.pl. Poniżej znajduje się moduł weryfikacji autentyczności strony
+          za pomocą aplikacji <strong>mObywatel</strong>.
+        </p>
+
+        <div
+          class="verify-box"
+          id="moby-verify"
+          data-service-id="TAX-PL-LEGIT"
+          data-api-url=""
+        >
+          <button type="button" id="moby-verify-btn">
+            Zweryfikuj tę stronę w mObywatel
+          </button>
+
+          <div id="moby-verify-qr">
+            <span class="hint">
+              Po kliknięciu przycisku tutaj pojawi się jednorazowy kod QR do
+              weryfikacji.
+            </span>
+          </div>
+
+          <div id="moby-verify-status" class="hint"></div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

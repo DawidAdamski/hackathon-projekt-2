@@ -1,5 +1,7 @@
 # Weryfikacja autentyczności stron gov.pl za pomocą aplikacji mobilnej mObywatel
 
+857bab8e-e3f1-45f6-933c-c598bb0500ff
+
 ## Przegląd projektu
 
 Projekt ma na celu stworzenie rozwiązania, które pozwoli obywatelom na wiarygodną weryfikację stron w domenach administracji publicznej (gov.pl). W związku z rosnącą liczbą prób oszustw wykorzystujących strony stylizowane na strony rządowe i podszywanie się pod dostawców usług publicznych, potrzebna jest prosta i szybka ścieżka pozwalająca na sprawdzenie przez obywatela wiarygodności takich stron.
@@ -73,6 +75,7 @@ Najlepsze rozwiązania mogą zostać skierowane do pilotażowego wdrożenia w pr
 - Film umieszczony w dostępnym, otwartym repozytorium (link), trwający maksymalnie 3 minuty
 
 **Dodatkowo (opcjonalnie):**
+
 - Repozytorium kodu
 - Zrzuty ekranu
 - Linki do demonstracji
@@ -81,6 +84,7 @@ Najlepsze rozwiązania mogą zostać skierowane do pilotażowego wdrożenia w pr
 ## Kontakt i wsparcie
 
 Podczas wydarzenia dostępni będą:
+
 - Mentorzy techniczni i merytoryczni w specjalnie oznaczonym punkcie konsultacyjnym
 - Kanał komunikacyjny na Discord z dostępem do zasobów i dokumentacji
 

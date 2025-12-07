@@ -49,6 +49,7 @@ class TokenService:
         return token_data
 
     def update(self, token: str) -> Optional[dict]:
+        logger.info(f"Update for token: {token}")
         token_data = self.storage.get(token, None)
 
         if not token_data:
@@ -64,7 +65,9 @@ class TokenService:
             return None
 
         logger.info(f"Token updated: {token}")
-        self.storage[token]["mobywatel_scan"] = 1
+        token_data["mobywatel_scan"] = 1
+        # Save updated token back to storage
+        self.storage[token] = json.dumps(token_data)
         return token_data
 
     def token_expired(self, created_at: int) -> bool:

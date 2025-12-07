@@ -72,7 +72,6 @@ async def handle_scan(
 
     if not token:
         return {"status": "untrusted"}
-
     else:
         return {"status": "trusted", "domain": token["domain"]}
 

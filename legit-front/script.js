@@ -48,7 +48,7 @@ window.addEventListener("load", () => {
       qrBox.appendChild(qrContainer);
       qrBox.appendChild(label);
 
-      statusBox.textContent = "Oczekiwanie na wynik weryfikacji...";
+      statusBox.textContent = "Oczekiwanie na zeskanowanie kodu QR...";
 
       if (currentPollInterval) {
         clearInterval(currentPollInterval);
@@ -65,7 +65,7 @@ window.addEventListener("load", () => {
 });
 
 function startPolling(apiUrl, nonce, statusBox, btn) {
-  return setInterval(async () => {
+  const pollInterval = setInterval(async () => {
     try {
       const res = await fetch(
         `${apiUrl}/verify/result?nonce=${encodeURIComponent(nonce)}`,
@@ -78,26 +78,40 @@ function startPolling(apiUrl, nonce, statusBox, btn) {
 
       const data = await res.json();
 
-      if (data.status === "pending") return;
+      // Continue polling if waiting for scan
+      if (data.status === "waiting for scan") {
+        statusBox.className = "hint";
+        statusBox.textContent = "Oczekiwanie na zeskanowanie kodu QR...";
+        return;
+      }
 
-      clearInterval(window.currentPollInterval);
-      btn.disabled = false;
+      // Stop polling for final statuses (trusted or untrusted)
+      if (data.status === "trusted" || data.status === "untrusted") {
+        clearInterval(pollInterval);
+        btn.disabled = false;
 
-      if (data.status === "trusted") {
-        statusBox.className = "status-ok";
-        statusBox.textContent =
-          "✅ Strona jest zaufana. Możesz bezpiecznie kontynuować.";
-      } else if (data.status === "untrusted") {
-        statusBox.className = "status-warn";
-        statusBox.textContent =
-          "❌ Uwaga! Ta strona nie przeszła weryfikacji. Przerwij korzystanie i zgłoś podejrzenie oszustwa.";
+        if (data.status === "trusted") {
+          statusBox.className = "status-ok";
+          statusBox.textContent =
+            "✅ Strona jest zaufana. Możesz bezpiecznie kontynuować.";
+        } else if (data.status === "untrusted") {
+          statusBox.className = "status-warn";
+          statusBox.textContent =
+            "❌ Uwaga! Ta strona nie przeszła weryfikacji. Przerwij korzystanie i zgłoś podejrzenie oszustwa.";
+        }
       } else {
+        // Unknown status - stop polling and show error
+        clearInterval(pollInterval);
+        btn.disabled = false;
         statusBox.className = "status-warn";
         statusBox.textContent =
           "Wystąpił błąd podczas weryfikacji. Spróbuj ponownie później.";
       }
     } catch (err) {
       console.error(err);
+      // On error, continue polling (might be temporary network issue)
     }
   }, 2000);
+
+  return pollInterval;
 }

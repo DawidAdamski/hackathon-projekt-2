@@ -17,6 +17,12 @@ async def lifespan(app: FastAPI):
 
     print("Start verifyer!")
 
+    # NOTE: Here we can add clenup task for clnup expired tokens from storage
+    # in case of switching to Redis there is this functionality out of the box
+    # from fastapi import BackgroundTasks
+    # background_tasks = BackgroundTasks()
+    # background_tasks.add_task(self.clenup_job)
+
     yield
     print("Stop verifyer!")
 

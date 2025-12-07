@@ -1,10 +1,12 @@
 import json
 import time
-from datetime import datetime, timedelta
 from functools import lru_cache
 from time import sleep
+from typing import Optional
 
-from app.core.config import Settings
+from app.core.logger import logger
+
+TOKEN_TTL: int = 2 * 60
 
 
 class TokenService:
@@ -12,39 +14,65 @@ class TokenService:
     def __init__(self):
         self.storage = {}
         self.clenup_interval = 5
-        self.clenup_job()
 
-    def save_token(self, token, domain):
+    def save_token(self, token: str, domain: str) -> dict:
+
+        logger.info(f"Save token: {token} for domain: {domain}")
 
         entry = {
             "domain": domain,
             "created_at": int(time.time()),
+            "mobywatel_scan": 0,
         }
 
         # NOTE: In case of REDIS in future
         self.storage[token] = json.dumps(entry)
+        logger.info(self.storage)
         return entry
 
-    def load(self, token):
+    def load(self, token: str) -> Optional[dict]:
         token_data = self.storage.get(token, None)
 
         if not token_data:
+            logger.info(f"Missing token: {token}")
             return None
 
         # NOTE: In case of REDIS in future
-        created_at = json.loads(token_data).get("created_at", 0)
+        token_data = json.loads(token_data)
+        created_at = token_data.get("created_at", 0)
         if self.token_expired(created_at):
+            logger.info(f"Expired token: {token}")
             del self.storage[token]
             return None
 
-        return self.storage.get(token, None)
+        logger.info(f"Token found: {token}")
+        return token_data
 
-    def token_expired(self, created_at: int):
+    def update(self, token: str) -> Optional[dict]:
+        token_data = self.storage.get(token, None)
+
+        if not token_data:
+            logger.info(f"Missing token: {token}")
+            return None
+
+        # NOTE: In case of REDIS in future
+        token_data = json.loads(token_data)
+        created_at = token_data.get("created_at", 0)
+        if self.token_expired(created_at):
+            logger.info(f"Expired token: {token}")
+            del self.storage[token]
+            return None
+
+        logger.info(f"Token updated: {token}")
+        self.storage[token]["mobywatel_scan"] = 1
+        return token_data
+
+    def token_expired(self, created_at: int) -> bool:
         age = int(time.time()) - created_at
-        return age > Settings.TOKEN_TTL
+        return age > TOKEN_TTL
 
     # NOTE: Simple cleanup job running in background to remove expired tokens
-    def clenup_job(self):
+    def clenup_job(self) -> None:
         while True:
             tokens_to_delete = []
             for token, data in self.storage.items():

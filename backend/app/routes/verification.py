@@ -1,3 +1,6 @@
+import re
+
+from app.core.logger import logger
 from app.schemas.verification import VerifySessionRequest
 from app.services.storage import TokenService, get_token_service
 from app.services.token_generator import generate_nonce_token
@@ -24,32 +27,54 @@ async def create_verify_session(
     nonce = generate_nonce_token()
     qr_payload = f"moby-sim://verify?nonce={nonce}"
     token_service.save_token(token=nonce, domain=origin)
+
+    # NOTE: We return nonce token base on what QRCode will be generated on frontend
+    # For mock purpouses the exact value is displayed for copy and paste in mock mObywatel app
     return {
         "nonce": nonce,
         "qr_payload": qr_payload,
     }
 
-    # NOTE: We return nonce token base on what QRCode will be generated on frontend
-    # For mock purpouses the exact value is displayed for copy and paste in mock mObywatel app
 
-    # 5. To ma zeskanowac user - zasymuluj to przez dodanie input boxa na fronie mocka mobywatela ktory wysle request do
-    #    dokonczenia veryfikacji
-    # 6. na potrzeby moka wysweitl do skopiowania kod
-
-
-# Endpoint do sprawdzania wyniku weryfikacji
 @router.get("/result")
-async def get_verify_result(nonce: str):
-    # Symulacja wyniku weryfikacji
-    if nonce == "example_nonce":
-        return {"status": "trusted"}
-    else:
+async def get_verify_result(
+    nonce: str,
+    req: Request,
+    token_service: TokenService = Depends(get_token_service),
+):
+    origin = req.headers.get("host", "")
+    logger.info(f"Verifying nonce: {nonce} from origin: {origin}")
+
+    token = token_service.load(nonce)
+    logger.info(f"Loaded token data: {token}")
+
+    if not token:
         return {"status": "untrusted"}
+
+    if token["domain"] != origin:
+        return {"status": "untrusted"}
+
+    if not token["mobywatel_scan"]:
+        return {"status": "waiting for scan"}
+
+    else:
+        return {"status": "trusted"}
 
 
 @router.get("/scan")
-async def handle_scan():
-    return {"status": "router ok"}
+async def handle_scan(
+    nonce: str,
+    req: Request,
+    token_service: TokenService = Depends(get_token_service),
+):
+    origin = req.headers.get("host", "")
+    token = token_service.update(nonce)
+
+    if not token:
+        return {"status": "untrusted"}
+
+    else:
+        return {"status": "trusted", "domain": token["domain"]}
 
 
 @router.get("/test")

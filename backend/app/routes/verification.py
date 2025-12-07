@@ -1,7 +1,7 @@
 import re
 
 from app.core.logger import logger
-from app.schemas.verification import VerifySessionRequest
+from app.schemas.verification import ScanRequest, VerifySessionRequest
 from app.services.storage import TokenService, get_token_service
 from app.services.token_generator import generate_nonce_token
 from app.services.validator import is_gov_domain, is_trusted_domain
@@ -58,22 +58,39 @@ async def get_verify_result(
         return {"status": "waiting for scan"}
 
     else:
+        token_service.remove(nonce)
         return {"status": "trusted"}
 
 
-@router.get("/scan")
+@router.post("/scan")
 async def handle_scan(
-    nonce: str,
+    request: ScanRequest,
     req: Request,
     token_service: TokenService = Depends(get_token_service),
 ):
+    """
+    Endpoint wywoływany przez mObywatel po zeskanowaniu kodu QR.
+    Aktualizuje flagę mobywatel_scan na 1.
+    """
+    nonce = request.nonce
     origin = req.headers.get("host", "")
+    logger.info(f"Scan request for nonce: {nonce} from origin: {origin}, mobywatel: {request.mobywatel}")
+
     token = token_service.update(nonce)
+    logger.info(f"Token after update: {token}")
 
     if not token:
-        return {"status": "untrusted"}
+        logger.warning(f"Token not found or expired: {nonce}")
+        return {"status": "untrusted", "details": "Token nie został znaleziony lub wygasł"}
     else:
-        return {"status": "trusted", "domain": token["domain"]}
+        # Sprawdź czy domena się zgadza
+        # domain -> strona gov
+        # origin -> mobywagel
+        # if token["domain"] != origin:
+        #     logger.warning(f"Domain mismatch: token domain {token['domain']} != request origin {origin}")
+        #     return {"status": "untrusted", "details": "Niezgodność domeny"}
+
+        return {"status": "trusted", "origin": token["domain"], "details": "Weryfikacja zakończona pomyślnie"}
 
 
 @router.get("/test")

@@ -1,6 +1,7 @@
 // Configuration
 const CONFIG = {
-  API_BASE_URL: "http://127.0.0.1:8000",
+  //API_BASE_URL: "http://127.0.0.1:8000",
+  API_BASE_URL: "",
   API_ENDPOINT: "/verify/scan",
   MOBYWATEL_INFO: "mObywatel-mock-v1.0",
 };
@@ -100,9 +101,9 @@ function handleVerificationResponse(data) {
   showResult();
 
   // Update status indicator
-  if (status === "trusted" || status === "verified") {
+  if (status === "trusted") {
     showSuccessStatus(details, origin);
-  } else if (status === "untrusted" || status === "failed") {
+  } else if (status === "untrusted") {
     showErrorStatus(details, origin);
   } else {
     showPendingStatus(details, origin);

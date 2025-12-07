@@ -153,8 +153,9 @@ class TestVerificationResult:
         nonce = session_response.json()["nonce"]
 
         # Zeskanuj kod
-        scan_response = client.get(
-            f"/verify/scan?nonce={nonce}",
+        scan_response = client.post(
+            "/verify/scan",
+            json={"nonce": nonce, "mobywatel": "mObywatel-mock"},
             headers={"host": trusted_domain},
         )
         assert scan_response.status_code == 200
@@ -217,22 +218,24 @@ class TestScanEndpoint:
         nonce = session_response.json()["nonce"]
 
         # Zeskanuj kod
-        scan_response = client.get(
-            f"/verify/scan?nonce={nonce}",
+        scan_response = client.post(
+            "/verify/scan",
+            json={"nonce": nonce, "mobywatel": "mObywatel-mock"},
             headers={"host": trusted_domain},
         )
 
         assert scan_response.status_code == 200
         data = scan_response.json()
         assert data["status"] == "trusted"
-        assert data["domain"] == trusted_domain
+        assert data["origin"] == trusted_domain
 
     def test_scan_untrusted_for_missing_token(self, client, trusted_domain):
         """Test skanowania nieistniejącego tokenu"""
         fake_nonce = "00000000-0000-0000-0000-000000000000"
 
-        scan_response = client.get(
-            f"/verify/scan?nonce={fake_nonce}",
+        scan_response = client.post(
+            "/verify/scan",
+            json={"nonce": fake_nonce, "mobywatel": "mObywatel-mock"},
             headers={"host": trusted_domain},
         )
 
@@ -335,8 +338,9 @@ class TestIntegrationFlow:
         assert result_before.json()["status"] == "waiting for scan"
 
         # 3. Zeskanuj kod
-        scan_response = client.get(
-            f"/verify/scan?nonce={nonce}",
+        scan_response = client.post(
+            "/verify/scan",
+            json={"nonce": nonce, "mobywatel": "mObywatel-mock"},
             headers={"host": trusted_domain},
         )
         assert scan_response.status_code == 200
@@ -367,7 +371,11 @@ class TestIntegrationFlow:
         nonce2 = session2.json()["nonce"]
 
         # Zeskanuj tylko pierwszą
-        client.get(f"/verify/scan?nonce={nonce1}", headers={"host": trusted_domain})
+        client.post(
+            "/verify/scan",
+            json={"nonce": nonce1, "mobywatel": "mObywatel-mock"},
+            headers={"host": trusted_domain},
+        )
 
         # Sprawdź statusy
         result1 = client.get(

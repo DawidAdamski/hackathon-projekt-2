@@ -45,8 +45,53 @@ window.addEventListener("load", () => {
       label.className = "hint";
       label.textContent = "Zeskanuj ten kod aplikacją mObywatel (symulacja).";
 
+      // Dodaj wyświetlanie tokenu do skopiowania
+      const tokenContainer = document.createElement("div");
+      tokenContainer.className = "token-display";
+      tokenContainer.style.marginTop = "15px";
+      tokenContainer.style.padding = "10px";
+      tokenContainer.style.backgroundColor = "#f8f9fa";
+      tokenContainer.style.borderRadius = "8px";
+      tokenContainer.style.border = "1px solid #e0e0e0";
+
+      const tokenLabel = document.createElement("div");
+      tokenLabel.className = "hint";
+      tokenLabel.style.fontSize = "12px";
+      tokenLabel.style.marginBottom = "5px";
+      tokenLabel.textContent = "Token (do skopiowania do mObywatel):";
+
+      const tokenValue = document.createElement("div");
+      tokenValue.style.fontFamily = "monospace";
+      tokenValue.style.fontSize = "11px";
+      tokenValue.style.wordBreak = "break-all";
+      tokenValue.style.color = "#333";
+      tokenValue.textContent = data.nonce;
+
+      const copyBtn = document.createElement("button");
+      copyBtn.textContent = "📋 Kopiuj";
+      copyBtn.style.marginTop = "5px";
+      copyBtn.style.padding = "5px 10px";
+      copyBtn.style.fontSize = "12px";
+      copyBtn.style.cursor = "pointer";
+      copyBtn.style.border = "1px solid #ccc";
+      copyBtn.style.borderRadius = "4px";
+      copyBtn.style.backgroundColor = "#fff";
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(data.nonce).then(() => {
+          copyBtn.textContent = "✓ Skopiowano!";
+          setTimeout(() => {
+            copyBtn.textContent = "📋 Kopiuj";
+          }, 2000);
+        });
+      };
+
+      tokenContainer.appendChild(tokenLabel);
+      tokenContainer.appendChild(tokenValue);
+      tokenContainer.appendChild(copyBtn);
+
       qrBox.appendChild(qrContainer);
       qrBox.appendChild(label);
+      qrBox.appendChild(tokenContainer);
 
       statusBox.textContent = "Oczekiwanie na zeskanowanie kodu QR...";
 
@@ -97,7 +142,7 @@ function startPolling(apiUrl, nonce, statusBox, btn) {
         } else if (data.status === "untrusted") {
           statusBox.className = "status-warn";
           statusBox.textContent =
-            "❌ Uwaga! Ta strona nie przeszła weryfikacji. Przerwij korzystanie i zgłoś podejrzenie oszustwa.";
+            "❌ Uwaga! Ta strona nie przeszła weryfikacji.";
         }
       } else {
         // Unknown status - stop polling and show error

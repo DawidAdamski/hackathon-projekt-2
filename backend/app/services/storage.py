@@ -30,6 +30,10 @@ class TokenService:
         logger.info(self.storage)
         return entry
 
+    def remove(self, token: str) -> None:
+        # NOTE: After verification there is no point to keep the token in stroage
+        del self.storage[token]
+
     def load(self, token: str) -> Optional[dict]:
         token_data = self.storage.get(token, None)
 

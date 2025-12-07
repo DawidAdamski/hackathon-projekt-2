@@ -3,20 +3,68 @@ window.addEventListener("load", () => {
   if (!root) return;
 
   const btn = document.getElementById("moby-verify-btn");
-  const qrBox = document.getElementById("moby-verify-qr");
-  const statusBox = document.getElementById("moby-verify-status");
+  const modal = document.getElementById("verification-modal");
+  const modalCloseBtn = document.getElementById("modal-close-btn");
+  const modalQrContainer = document.getElementById("modal-qr-container");
+  const modalTokenContainer = document.getElementById("modal-token-container");
+  const modalStatus = document.getElementById("modal-status");
 
   const API_URL = root.dataset.apiUrl || ""; // empty = same origin
   const SERVICE_ID = root.dataset.serviceId || "UNKNOWN";
 
   let currentPollInterval = null;
+  let currentNonce = null;
+
+  // Open modal function
+  function openModal() {
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+
+  // Close modal function
+  function closeModal() {
+    modal.classList.add("hidden");
+    document.body.style.overflow = "";
+
+    // Stop polling when modal is closed
+    if (currentPollInterval) {
+      clearInterval(currentPollInterval);
+      currentPollInterval = null;
+    }
+
+    // Reset button
+    btn.disabled = false;
+    currentNonce = null;
+  }
+
+  // Close modal handlers
+  modalCloseBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal || e.target.classList.contains("modal-overlay")) {
+      closeModal();
+    }
+  });
+
+  // Escape key to close modal
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeModal();
+    }
+  });
 
   btn.addEventListener("click", async () => {
     btn.disabled = true;
-    statusBox.className = "hint";
-    statusBox.textContent = "Generuję sesję weryfikacyjną...";
 
-    qrBox.innerHTML = "";
+    // Clear previous content
+    modalQrContainer.innerHTML = "";
+    modalTokenContainer.innerHTML = "";
+    modalStatus.innerHTML = "";
+    modalStatus.className = "modal-status";
+
+    // Show loading state
+    modalStatus.innerHTML =
+      '<div class="status-loading">Generuję sesję weryfikacyjną...</div>';
+    openModal();
 
     try {
       const res = await fetch(`${API_URL}/verify/session`, {
@@ -33,130 +81,154 @@ window.addEventListener("load", () => {
       }
 
       const data = await res.json();
+      currentNonce = data.nonce;
 
+      // Create QR code
       const qrContainer = document.createElement("div");
+      qrContainer.className = "qr-code-wrapper";
       new QRCode(qrContainer, {
         text: data.qr_payload,
-        width: 128,
-        height: 128,
+        width: 200,
+        height: 200,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
       });
 
-      const label = document.createElement("div");
-      label.className = "hint";
-      label.textContent = "Zeskanuj ten kod aplikacją mObywatel (symulacja).";
+      const qrLabel = document.createElement("div");
+      qrLabel.className = "qr-label";
+      qrLabel.textContent = "Zeskanuj ten kod aplikacją mObywatel";
 
-      // Dodaj wyświetlanie tokenu do skopiowania
-      const tokenContainer = document.createElement("div");
-      tokenContainer.className = "token-display";
-      tokenContainer.style.marginTop = "15px";
-      tokenContainer.style.padding = "10px";
-      tokenContainer.style.backgroundColor = "#f8f9fa";
-      tokenContainer.style.borderRadius = "8px";
-      tokenContainer.style.border = "1px solid #e0e0e0";
+      modalQrContainer.appendChild(qrContainer);
+      modalQrContainer.appendChild(qrLabel);
+
+      // Create token display
+      const tokenWrapper = document.createElement("div");
+      tokenWrapper.className = "token-wrapper";
 
       const tokenLabel = document.createElement("div");
-      tokenLabel.className = "hint";
-      tokenLabel.style.fontSize = "12px";
-      tokenLabel.style.marginBottom = "5px";
-      tokenLabel.textContent = "Token (do skopiowania do mObywatel):";
+      tokenLabel.className = "token-label";
+      tokenLabel.textContent = "Token (do skopiowania):";
+
+      const tokenValueContainer = document.createElement("div");
+      tokenValueContainer.className = "token-value-container";
 
       const tokenValue = document.createElement("div");
-      tokenValue.style.fontFamily = "monospace";
-      tokenValue.style.fontSize = "11px";
-      tokenValue.style.wordBreak = "break-all";
-      tokenValue.style.color = "#333";
+      tokenValue.className = "token-value";
       tokenValue.textContent = data.nonce;
 
       const copyBtn = document.createElement("button");
+      copyBtn.className = "copy-btn";
       copyBtn.textContent = "📋 Kopiuj";
-      copyBtn.style.marginTop = "5px";
-      copyBtn.style.padding = "5px 10px";
-      copyBtn.style.fontSize = "12px";
-      copyBtn.style.cursor = "pointer";
-      copyBtn.style.border = "1px solid #ccc";
-      copyBtn.style.borderRadius = "4px";
-      copyBtn.style.backgroundColor = "#fff";
       copyBtn.onclick = () => {
-        navigator.clipboard.writeText(data.nonce).then(() => {
-          copyBtn.textContent = "✓ Skopiowano!";
-          setTimeout(() => {
-            copyBtn.textContent = "📋 Kopiuj";
-          }, 2000);
-        });
+        navigator.clipboard
+          .writeText(data.nonce)
+          .then(() => {
+            copyBtn.textContent = "✓ Skopiowano!";
+            copyBtn.classList.add("copied");
+            setTimeout(() => {
+              copyBtn.textContent = "📋 Kopiuj";
+              copyBtn.classList.remove("copied");
+            }, 2000);
+          })
+          .catch(() => {
+            // Fallback
+            const textArea = document.createElement("textarea");
+            textArea.value = data.nonce;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            copyBtn.textContent = "✓ Skopiowano!";
+            setTimeout(() => {
+              copyBtn.textContent = "📋 Kopiuj";
+            }, 2000);
+          });
       };
 
-      tokenContainer.appendChild(tokenLabel);
-      tokenContainer.appendChild(tokenValue);
-      tokenContainer.appendChild(copyBtn);
+      tokenValueContainer.appendChild(tokenValue);
+      tokenValueContainer.appendChild(copyBtn);
+      tokenWrapper.appendChild(tokenLabel);
+      tokenWrapper.appendChild(tokenValueContainer);
+      modalTokenContainer.appendChild(tokenWrapper);
 
-      qrBox.appendChild(qrContainer);
-      qrBox.appendChild(label);
-      qrBox.appendChild(tokenContainer);
+      // Update status
+      modalStatus.innerHTML =
+        '<div class="status-waiting">Oczekiwanie na zeskanowanie kodu QR...</div>';
 
-      statusBox.textContent = "Oczekiwanie na zeskanowanie kodu QR...";
-
+      // Start polling
       if (currentPollInterval) {
         clearInterval(currentPollInterval);
       }
-      currentPollInterval = startPolling(API_URL, data.nonce, statusBox, btn);
+      currentPollInterval = startPolling(API_URL, data.nonce, modalStatus);
     } catch (err) {
       console.error(err);
-      statusBox.className = "status-warn";
-      statusBox.textContent =
-        "Nie udało się rozpocząć weryfikacji. Spróbuj ponownie później.";
+      modalStatus.className = "modal-status status-error";
+      modalStatus.innerHTML =
+        '<div class="status-error-text">Nie udało się rozpocząć weryfikacji. Spróbuj ponownie później.</div>';
       btn.disabled = false;
     }
   });
-});
 
-function startPolling(apiUrl, nonce, statusBox, btn) {
-  const pollInterval = setInterval(async () => {
-    try {
-      const res = await fetch(
-        `${apiUrl}/verify/result?nonce=${encodeURIComponent(nonce)}`,
-      );
+  function startPolling(apiUrl, nonce, statusElement) {
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(
+          `${apiUrl}/verify/result?nonce=${encodeURIComponent(nonce)}`,
+        );
 
-      if (!res.ok) {
-        console.warn("Błąd podczas pollingu", res.status);
-        return;
-      }
-
-      const data = await res.json();
-
-      // Continue polling if waiting for scan
-      if (data.status === "waiting for scan") {
-        statusBox.className = "hint";
-        statusBox.textContent = "Oczekiwanie na zeskanowanie kodu QR...";
-        return;
-      }
-
-      // Stop polling for final statuses (trusted or untrusted)
-      if (data.status === "trusted" || data.status === "untrusted") {
-        clearInterval(pollInterval);
-        btn.disabled = false;
-
-        if (data.status === "trusted") {
-          statusBox.className = "status-ok";
-          statusBox.textContent =
-            "✅ Strona jest zaufana. Możesz bezpiecznie kontynuować.";
-        } else if (data.status === "untrusted") {
-          statusBox.className = "status-warn";
-          statusBox.textContent =
-            "❌ Uwaga! Ta strona nie przeszła weryfikacji.";
+        if (!res.ok) {
+          console.warn("Błąd podczas pollingu", res.status);
+          return;
         }
-      } else {
-        // Unknown status - stop polling and show error
-        clearInterval(pollInterval);
-        btn.disabled = false;
-        statusBox.className = "status-warn";
-        statusBox.textContent =
-          "Wystąpił błąd podczas weryfikacji. Spróbuj ponownie później.";
-      }
-    } catch (err) {
-      console.error(err);
-      // On error, continue polling (might be temporary network issue)
-    }
-  }, 2000);
 
-  return pollInterval;
-}
+        const data = await res.json();
+
+        // Continue polling if waiting for scan
+        if (data.status === "waiting for scan") {
+          statusElement.innerHTML =
+            '<div class="status-waiting">Oczekiwanie na zeskanowanie kodu QR...</div>';
+          return;
+        }
+
+        // Stop polling for final statuses (trusted or untrusted)
+        if (data.status === "trusted" || data.status === "untrusted") {
+          clearInterval(pollInterval);
+          currentPollInterval = null;
+
+          if (data.status === "trusted") {
+            statusElement.className = "modal-status status-success";
+            statusElement.innerHTML = `
+              <div class="status-icon">✅</div>
+              <div class="status-text">
+                <strong>Weryfikacja zakończona pomyślnie</strong>
+                <p>Strona jest zaufana. Możesz bezpiecznie kontynuować.</p>
+              </div>
+            `;
+          } else if (data.status === "untrusted") {
+            statusElement.className = "modal-status status-error";
+            statusElement.innerHTML = `
+              <div class="status-icon">❌</div>
+              <div class="status-text">
+                <strong>Weryfikacja nie powiodła się</strong>
+                <p>Ta strona nie przeszła weryfikacji.</p>
+              </div>
+            `;
+          }
+        } else {
+          // Unknown status - stop polling and show error
+          clearInterval(pollInterval);
+          currentPollInterval = null;
+          statusElement.className = "modal-status status-error";
+          statusElement.innerHTML =
+            '<div class="status-error-text">Wystąpił błąd podczas weryfikacji. Spróbuj ponownie później.</div>';
+        }
+      } catch (err) {
+        console.error(err);
+        // On error, continue polling (might be temporary network issue)
+      }
+    }, 2000);
+
+    return pollInterval;
+  }
+});

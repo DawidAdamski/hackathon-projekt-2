@@ -83,13 +83,6 @@ async def handle_scan(
         logger.warning(f"Token not found or expired: {nonce}")
         return {"status": "untrusted", "details": "Token nie został znaleziony lub wygasł"}
     else:
-        # Sprawdź czy domena się zgadza
-        # domain -> strona gov
-        # origin -> mobywagel
-        # if token["domain"] != origin:
-        #     logger.warning(f"Domain mismatch: token domain {token['domain']} != request origin {origin}")
-        #     return {"status": "untrusted", "details": "Niezgodność domeny"}
-
         return {"status": "trusted", "origin": token["domain"], "details": "Weryfikacja zakończona pomyślnie"}
 
 

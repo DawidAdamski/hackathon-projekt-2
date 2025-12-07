@@ -128,17 +128,46 @@ function showSuccessStatus(details, origin, ssl_info) {
 
   let sslInfoHtml = "";
   if (ssl_info) {
+    // Formatuj daty jeśli są w formacie ISO string lub datetime object
+    const formatDate = (dateValue) => {
+      if (!dateValue) return "";
+      try {
+        // Jeśli to string ISO, parsuj i sformatuj
+        if (typeof dateValue === "string") {
+          const date = new Date(dateValue);
+          return date.toLocaleString("pl-PL", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+        // Jeśli to już sformatowana data, zwróć jak jest
+        return dateValue;
+      } catch (e) {
+        return dateValue;
+      }
+    };
+
+    // Formatuj listę SAN DNS
+    const formatSanDns = (sanDns) => {
+      if (!sanDns || !Array.isArray(sanDns) || sanDns.length === 0) return "";
+      return sanDns.join(", ");
+    };
+
     sslInfoHtml = `
       <div class="ssl-info-section">
         <h4>Informacje o certyfikacie SSL:</h4>
         <div class="ssl-info-details">
+          ${ssl_info.common_name ? `<p><strong>Nazwa pospolita (CN):</strong> ${escapeHtml(ssl_info.common_name)}</p>` : ""}
           ${ssl_info.organization ? `<p><strong>Organizacja:</strong> ${escapeHtml(ssl_info.organization)}</p>` : ""}
-          ${ssl_info.common_name ? `<p><strong>Nazwa pospolita:</strong> ${escapeHtml(ssl_info.common_name)}</p>` : ""}
-          ${ssl_info.country ? `<p><strong>Kraj:</strong> ${escapeHtml(ssl_info.country)}</p>` : ""}
-          ${ssl_info.issuer ? `<p><strong>Wystawca:</strong> ${escapeHtml(ssl_info.issuer)}</p>` : ""}
-          ${ssl_info.valid_from ? `<p><strong>Ważny od:</strong> ${escapeHtml(ssl_info.valid_from)}</p>` : ""}
-          ${ssl_info.valid_to ? `<p><strong>Ważny do:</strong> ${escapeHtml(ssl_info.valid_to)}</p>` : ""}
-          ${ssl_info.serial_number ? `<p><strong>Numer seryjny:</strong> <code>${escapeHtml(ssl_info.serial_number)}</code></p>` : ""}
+          ${ssl_info.organizational_unit ? `<p><strong>Jednostka organizacyjna:</strong> ${escapeHtml(ssl_info.organizational_unit)}</p>` : ""}
+          ${ssl_info.issuer_organization ? `<p><strong>Wystawca (CA):</strong> ${escapeHtml(ssl_info.issuer_organization)}</p>` : ""}
+          ${ssl_info.issuer_common_name ? `<p><strong>Wystawca (CN):</strong> ${escapeHtml(ssl_info.issuer_common_name)}</p>` : ""}
+          ${ssl_info.not_before ? `<p><strong>Ważny od:</strong> ${escapeHtml(formatDate(ssl_info.not_before))}</p>` : ""}
+          ${ssl_info.not_after ? `<p><strong>Ważny do:</strong> ${escapeHtml(formatDate(ssl_info.not_after))}</p>` : ""}
+          ${ssl_info.san_dns && ssl_info.san_dns.length > 0 ? `<p><strong>Alternatywne nazwy (SAN):</strong> <code>${escapeHtml(formatSanDns(ssl_info.san_dns))}</code></p>` : ""}
         </div>
       </div>
     `;

@@ -389,13 +389,3 @@ class TestIntegrationFlow:
 
         assert result1.json()["status"] == "trusted"
         assert result2.json()["status"] == "waiting for scan"
-
-
-class TestTestEndpoint:
-    """Testy endpointu testowego"""
-
-    def test_test_endpoint(self, client):
-        """Test endpointu testowego"""
-        response = client.get("/verify/test")
-        assert response.status_code == 200
-        assert response.json()["status"] == "router ok"

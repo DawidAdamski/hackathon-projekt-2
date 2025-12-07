@@ -1,5 +1,4 @@
-from app.core.config import Settings, get_settings
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 
 TRUSTED_DOMAINS = [
     "datki.gov",

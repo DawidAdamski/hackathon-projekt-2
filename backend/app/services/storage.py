@@ -6,7 +6,7 @@ from typing import Optional
 
 from app.core.logger import logger
 
-TOKEN_TTL: int = 2 * 60
+TOKEN_TTL: int = 60
 
 
 class TokenService:

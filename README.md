@@ -1,51 +1,73 @@
 # NONCE upon a time
 
-## Uruchomienie wersji MVP
+## In SHORT
 
-Calość jest skonteneryzowana i sklada sie z 3 głównych modułów:
+Pokazujemy kompletny przepływ weryfikacji stron przez mObywatela — od kliknięcia w widget, po potwierdzenie w aplikacji.
 
-- `backend` - serwer API zarzadzajacy tokenami i weryfikacja
-- `legit-front` - mock strony gov z komponentem JS generujacym okno z kodem QR
-- `mObywatel` - symulowana aplikacja mObywatel do skanowania kodu QR i weryfikacji
+**Co zrobiliśmy:**
+
+- Zbudowaliśmy **backend**, który generuje jednorazowe tokeny (nonce), zapisuje je z czasem ważności i statusem oraz sprawdza, czy domena jest zaufana.
+- Stworzyliśmy **frontowy widget**, który pobiera token z backendu, wyświetla z niego **QR kod** i cyklicznie sprawdza status weryfikacji.
+- Przygotowaliśmy **symulowaną aplikację mObywatel**, która skanuje QR, wysyła token do backendu i odblokowuje proces.
+- Dorzuciliśmy **fake-frontend**, żeby pokazać, że niezaufana domena nie przejdzie procesu.
+
+**Jak to działa:**
+
+1. Użytkownik klika „Zweryfikuj tę stronę”.
+2. Widget pyta backend o token → backend sprawdza domenę → generuje nonce.
+3. Widget wyświetla QR zakodowany tokenem.
+4. „Aplikacja” mObywatel skanuje QR i wysyła token do backendu.
+5. Backend oznacza token jako zweryfikowany.
+6. Widget dostaje potwierdzenie i kończy proces.
+7. Jeśli token wygasł, jest niepoprawny lub domena nie jest zaufana → proces zatrzymany.
+
+**Efekt:**
+Mamy działające MVP pokazujące pełny flow weryfikacji strony przez mObywatela, z kontrolą domeny, ważności tokenów i komunikacją między trzema niezależnymi modułami.
+
+## Detale implementacji MVP
+
+### Uruchomienie wersji MVP
+
+Całość jest skonteneryzowana i składa się z 3 głównych modułów:
+
+- `backend` – serwer API zarządzający tokenami i weryfikacją
+- `legit-front` – mock strony gov z komponentem JS generującym okno z kodem QR
+- `mObywatel` – symulowana aplikacja mObywatel do skanowania kodu QR i weryfikacji
 
 Katalog projektu zawiera plik `docker-compose.yml`, który definiuje usługi dla każdego z modułów.
-Aby uruchomić wersję MVP, wykonaj następujące kroki:
+Aby uruchomić wersję MVP, wykonaj:
 
 ```bash
 docker compose up --build -d
 ```
 
-Wersja demonstracyjna dziala lokalnie i wymaga dodania regul do pliki `/etc/hosts` zeby poprawnie symulowac dzialanie
-systemu. Regoly do dodania:
+Wersja demonstracyjna działa lokalnie i wymaga dodania reguł do pliku `/etc/hosts`, żeby poprawnie symulować działanie systemu. Reguły:
 
 ```bash
 127.0.0.1 podatki.gov
 127.0.0.1 mobywatel
 ```
 
-- domena `podatki.gov` - symuluje strone gov.pl z widgetem do weryfikacji
-- domena `mobywatel` - symuluje aplikacje mObywatel
-- serwis `backend` w demonstracyjnej liscie dozwolonych domen mam dodana domene: `podatki.gov`, z tej domeny mozliwe
-  jest przeprowadzenie symulacji prawidlowego przebiegu weryfikacji.
+- domena `podatki.gov` – symuluje stronę gov.pl z widgetem do weryfikacji
+- domena `mobywatel` – symuluje aplikację mObywatel
+- serwis `backend` ma w demonstracyjnej liście zaufanych domen dodaną domenę `podatki.gov`, z której możliwe jest przeprowadzenie symulacji prawidłowego przebiegu weryfikacji
 
-Po przygotowaniu srodowiska demonstracyjen serwisy sa dostepne kolejno pod adresami:
+Po przygotowaniu środowiska demonstracyjnego serwisy są dostępne kolejno pod adresami:
 
-- mock aplikacji mobywatel `http://mobywatel:7777/`
-- mock strony gov z widgetem `http://podatki.gov:8888/`
-
-## Elementy projektu oraz ich implementacja
+- mock aplikacji mObywatel — `http://mobywatel:7777/`
+- mock strony gov z widgetem — `http://podatki.gov:8888/`
 
 ### Backend (verifier)
 
 Moduł `backend`:
 
-- odpowiedzialny za zarzadzanie tokenami
-- zawiera regoly validacyjne oraz zbior "trusted" domen
-- weryfikuje requestorw i zarzadza cyklem zycia tokenow
-- komunikuje sie z komponentem `legit-front` oraz aplikacja mObywatel (symulowana)
-- wystawia API dla modulu `legit-front` oraz aplikacji mObywatel
+- odpowiada za zarządzanie tokenami
+- zawiera reguły walidacyjne oraz zbiór „trusted” domen
+- weryfikuje requestory i zarządza cyklem życia tokenów
+- komunikuje się z komponentem `legit-front` oraz aplikacją mObywatel (symulowaną)
+- wystawia API dla modułu `legit-front` oraz aplikacji mObywatel
 
-#### Scope MVP dla modulu `backend`
+#### Scope MVP dla modułu `backend`
 
 1. Setup projektu i środowiska
 2. Implementacja endpointów API
@@ -59,12 +81,12 @@ Moduł `backend`:
 Moduł `legit-front`:
 
 - symulowana strona gov.pl
-- zawiera okno "popup" z przyciskiem do weryfikacji strony poprzez aplikację mObywatel
-- przygotowuje i wyswietla QR kod w modalu modalu
-- przyjmuje dane z modulu `backend` i na jego podstawie wyswietla jego reprezentacj w postaci kody QR
-- odpytuje `backend` o stan weryfikacji tokena - czy urzytkownik zeskanowal kod QR i czy strona jest zaufana
+- zawiera okno „popup” z przyciskiem do weryfikacji strony przez aplikację mObywatel
+- przygotowuje i wyświetla kod QR w modalu
+- przyjmuje dane z modułu `backend` i na ich podstawie wyświetla reprezentację tokena w formie kodu QR
+- odpytuje `backend` o stan weryfikacji tokena — czy użytkownik zeskanował kod QR i czy strona jest zaufana
 
-#### Scope MVP dla modulu `legit-front`
+#### Scope MVP dla modułu `legit-front`
 
 1. Stworzenie komponentu JavaScript
 2. Integracja z biblioteką QR
@@ -77,11 +99,11 @@ Moduł `legit-front`:
 Moduł `mObywatel`:
 
 - symulowana aplikacja mObywatel
-- komunikuje sie po API z modulem `backend` uzywajac udostepnionego API i tokena z kodu QR
-- mock strony ma na celu zedemonstrowac przebieg procesu
-- komunikuje sie z modulem `backend` i wyswietla dane przygotowane prze `backend`
+- komunikuje się z `backend` używając tokena z kodu QR
+- mock ma pokazywać przebieg procesu weryfikacji
+- wyświetla dane przygotowane przez `backend`
 
-#### Scope MVP dla modulu symulacji `mObywatel`
+#### Scope MVP dla modułu `mObywatel`
 
 1. Stworzenie aplikacji demo
 2. Funkcjonalność skanowania/symulacji QR
@@ -90,16 +112,15 @@ Moduł `mObywatel`:
 
 ### Integracja i testy
 
-1. End-to-end testy scenariuszy
-2. Testy bezpieczeństwa (nonce, replay attacks)
-3. Poprawki błędów
+1. Testy jednostkowe komponentow backendu (komenda `pytest` w katalogu `backend` po instalacji paczek z pliku `requirements.txt`)
+2. Manualna weryfikacja przepływu end-to-end
 
-### `fake-frontend` - dodatkowy moduł do testów
+### `fake-frontend` – dodatkowy moduł do testów
 
 - WIP
-- symulowana podrobiona strona podszywajaca sie pod gov.pl
-- inna domena ktora generuje linki ktore nie sa zapisywane w rpozytorium tokenow
-- na potrzeby symulacji
+- symulowana podrobiona strona podszywająca się pod gov.pl
+- inna domena, która generuje linki niepojawiające się w repozytorium tokenów
+- używana do symulacji
 
 ### Dokumentacja
 
@@ -108,40 +129,23 @@ Moduł `mObywatel`:
 3. Przygotowanie prezentacji
 4. Nagranie demo video
 
-## Opis dzialania serwisu i kluczowych komponentow
+## Opis działania serwisu i kluczowych komponentów
 
-- po naduszeniu przycisku "Zweryfikuj tę stronę w mObywatel" widget wysyla informace do backendu
-- backend odbiera wiadomosc i wstepnie weryfikuje requestora, sprawdzajac:
-  - czy requestor pochodzi z domeny .gov
-  - czy znajduje sie na liscie zaufanych domen
-- dla pomyslnej weryfikacji backend generuje unikalny token (nonce) oraz zapisuje go uzywajac `TokenService`
-  - na potrzeby demonstracji token serwis trzyma tokeny w pmaieci - w przyszloci mozna zaimplementowac przevchowywanie
-    tokenow w zewnetrznym serwisie na przyklad w REDIS - wystarczy zmodufikowac implemntacje metod clasy `TokenService`
-- tokeny zapisywane sa z dodatkowymi informacjami:
-  - dla jakiej domeny zostal wygenerowany token
-  - flaga statusu weryfikacji (czy qr kod zostal zeskanowany)
-  - czas wygenerowania tokena - potrzebny do invalidacji tokena po okreslonym czasie (aktualnie 60s)
-- po zapisie backend zwraca informacje do widgetu z wygenerowanym tokenem na podstawie ktorego widget generuje kod QR w
-  przegladarce uzytkownika
-- pozytywna odpowiedz z backendu wyzwala w widgecie akcje sprawdzajaca status weryfikacji - to jest czy qr kod zostal
-  zeskanowany
-- zeskanowanie kodu QR przez aplikacje mObywatel (symulowana) powoduje wyslanie requestu do backendu z tokenem dla
-  jakiego QR kod zostal wygenerowany - odpowiednia flaga jest ustawiona dla tego tokena co przerywa petle sprwadzajca
-- po zeskananiu kodu qr aplikacja mobuwatel dostaje informacje o sttusie weryfikacji oraz dodatkowe informacje
-  wyciagniete z certyfkatu SSL (w wersji demo sa przykladowe dla domeny gov.pl)
-- w przyadku wygasnienac tokena lub nieprawidlowego tokena lub braku certyfikatu ssl dla powiazanej domeny backend
-  zwroci informacje o negatywnej weryfikacji
+- po naciśnięciu przycisku „Zweryfikuj tę stronę w mObywatel” widget wysyła informację do backendu
+- backend odbiera wiadomość i wstępnie weryfikuje requestora, sprawdzając:
+  - czy pochodzi z domeny `.gov`
+  - czy znajduje się na liście zaufanych domen
 
-## Wymagane elementy projektu
+- dla pomyślnej weryfikacji backend generuje unikalny token (nonce) i zapisuje go w `TokenService`
+  - na potrzeby demo tokeny są trzymane w pamięci — w przyszłości można je przenieść np. do Redis
 
-- Szczegółowy opis i tytuł projektu
-- Prezentacja w formacie PDF (maksymalnie 10 slajdów)
-- Makieta rozwiązania, prezentujące jego użyteczność
-- Film umieszczony w dostępnym, otwartym repozytorium (link), trwający maksymalnie 3 minuty
+- token zawiera dodatkowe informacje:
+  - dla jakiej domeny został wygenerowany
+  - flagę statusu weryfikacji (czy kod QR został zeskanowany)
+  - timestamp wygenerowania — potrzebny do unieważniania tokenów po czasie (aktualnie 60s)
 
-**Dodatkowo (opcjonalnie):**
-
-- Repozytorium kodu
-- Zrzuty ekranu
-- Linki do demonstracji
-- Materiały graficzne
+- po zapisie backend zwraca dane do widgetu, który generuje kod QR w przeglądarce
+- pozytywna odpowiedź backendu uruchamia w widgetcie pętlę sprawdzającą status weryfikacji
+- zeskanowanie kodu QR przez mObywatel powoduje wysłanie requestu do backendu — token dostaje flagę „verified”, co kończy pętlę
+- aplikacja mObywatel dostaje informację o statusie oraz dane wyciągnięte z certyfikatu SSL (w demo użyto przykładowych dla gov.pl)
+- w przypadku wygaśnięcia tokena, nieprawidłowego tokena lub braku certyfikatu SSL backend zwróci negatywną weryfikację

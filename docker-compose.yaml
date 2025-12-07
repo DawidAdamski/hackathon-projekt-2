@@ -4,8 +4,6 @@ services:
     container_name: fake-gov-mock
     ports:
       - "8889:80"
-    depends_on:
-      - verifier
     volumes:
       - ./fake-front/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./fake-front/index.html:/usr/share/nginx/html/index.html
@@ -17,19 +15,28 @@ services:
     container_name: legi-gov-mock
     ports:
       - "8888:80"
-    depends_on:
-      - verifier
     volumes:
       - ./legit-front/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./legit-front/index.html:/usr/share/nginx/html/index.html
       - ./legit-front/script.js:/usr/share/nginx/html/script.js
       - ./legit-front/styles.css:/usr/share/nginx/html/styles.css
 
-  verifier:
-    build: ./verifyer
-    container_name: verifyer
+  mobywatel:
+    build: ./mObywatel
+    container_name: mObywatel
+    ports:
+      - "7777:80"
+    volumes:
+      - ./mObywatel/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./mObywatel/index.html:/usr/share/nginx/html/index.html
+      - ./mObywatel/script.js:/usr/share/nginx/html/script.js
+      - ./mObywatel/styles.css:/usr/share/nginx/html/styles.css
+
+  backend:
+    build: ./backend
+    container_name: backend
+    volumes:
+      - ./backend:/backend
     ports:
       - "8000:8000"
-    volumes:
-      - ./verifyer:/verifyer
-    command: ["./entrypoint.sh"]
+    command: ["./entrypoints/api.sh"]

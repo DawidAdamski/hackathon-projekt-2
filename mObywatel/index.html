@@ -1,76 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mObywatel - Weryfikacja</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="phone-container">
-        <!-- Phone Frame -->
-        <div class="phone-frame">
-            <!-- Screen -->
-            <div class="phone-screen">
-                <!-- Status Bar -->
-                <div class="status-bar">
-                    <span class="time">12:34</span>
-                    <div class="status-icons">
-                        <span class="signal">📶</span>
-                        <span class="wifi">📶</span>
-                        <span class="battery">🔋</span>
-                    </div>
-                </div>
+      <!-- Phone Frame -->
+      <div class="phone-frame">
+        <!-- Screen -->
+        <div class="phone-screen">
+          <!-- Status Bar -->
+          <div class="status-bar">
+            <span class="time">12:34</span>
+            <div class="status-icons">
+              <span class="signal">📶</span>
+              <span class="wifi">📶</span>
+              <span class="battery">🔋</span>
+            </div>
+          </div>
 
-                <!-- App Header -->
-                <div class="app-header">
-                    <h1>mObywatel</h1>
-                    <p class="subtitle">Weryfikacja strony</p>
-                </div>
+          <!-- App Header -->
+          <div class="app-header">
+            <h1>mObywatel</h1>
+            <p class="subtitle">Weryfikacja strony</p>
+          </div>
 
-                <!-- Main Content -->
-                <div class="app-content">
-                <!-- Input Section -->
-                <div class="input-section">
-                    <label for="nonce-input">Wklej kod z kodu QR:</label>
-                    <input 
-                        type="text" 
-                        id="nonce-input" 
-                        placeholder="Wklej nonce token tutaj..."
-                        class="nonce-input"
-                    >
-                    <button id="verify-btn" class="verify-button">
-                        Zweryfikuj
-                    </button>
-                </div>
-
-                <!-- Result Section -->
-                <div id="result-section" class="result-section hidden">
-                    <div id="status-indicator" class="status-indicator"></div>
-                    <div id="result-details" class="result-details"></div>
-                </div>
-
-                <!-- Token Display Section -->
-                <div class="token-section">
-                    <label>Token (do skopiowania):</label>
-                    <div id="token-display" class="token-display">
-                        <span id="token-value">-</span>
-                        <button id="copy-btn" class="copy-button" title="Kopiuj">
-                            📋
-                        </button>
-                    </div>
-                </div>
+          <!-- Main Content -->
+          <div class="app-content">
+            <!-- Input Section -->
+            <div class="input-section">
+              <label for="nonce-input">Zeskanuj QR Kod:</label>
+              <input
+                type="text"
+                id="nonce-input"
+                placeholder="Wklej nonce token tutaj..."
+                class="nonce-input"
+              />
+              <button id="verify-btn" class="verify-button">Zweryfikuj</button>
             </div>
 
-                <!-- Loading Overlay -->
-                <div id="loading-overlay" class="loading-overlay hidden">
-                    <div class="spinner"></div>
-                    <p>Weryfikowanie...</p>
-                </div>
+            <!-- Result Section -->
+            <div id="result-section" class="result-section hidden">
+              <div id="status-indicator" class="status-indicator"></div>
+              <div id="result-details" class="result-details"></div>
             </div>
+
+            <!-- Token Display Section -->
+            <div class="token-section">
+              <label>Token (do skopiowania na potrzeby POC):</label>
+              <div id="token-display" class="token-display">
+                <span id="token-value">-</span>
+                <button id="copy-btn" class="copy-button" title="Kopiuj">
+                  📋
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Overlay -->
+          <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <p>Weryfikowanie...</p>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

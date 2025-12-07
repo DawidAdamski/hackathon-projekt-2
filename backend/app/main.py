@@ -8,8 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 settings = get_settings()
 
 
-# TODO: dodac jakis fake certyfikat do nginx i sciagac info z certyfikatu? ewentualnie z zamokowanej domenu gov
-# TODO: Clenup na tokeny expire w token storage
+# TODO: Clenup Task na tokeny expire w token storage
 
 
 @asynccontextmanager

@@ -1,6 +1,5 @@
 // Configuration
 const CONFIG = {
-  //API_BASE_URL: "http://127.0.0.1:8000",
   API_BASE_URL: "",
   API_ENDPOINT: "/verify/scan",
   MOBYWATEL_INFO: "mObywatel-mock-v1.0",

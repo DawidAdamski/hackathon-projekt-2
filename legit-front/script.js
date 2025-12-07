@@ -79,7 +79,8 @@ window.addEventListener("load", () => {
       if (!res.ok) {
         let errorMessage = `Błąd HTTP: ${res.status}`;
         if (res.status === 502) {
-          errorMessage = "Nie można połączyć się z serwerem weryfikacji. Sprawdź czy backend jest uruchomiony.";
+          errorMessage =
+            "Nie można połączyć się z serwerem weryfikacji. Sprawdź czy backend jest uruchomiony.";
         } else if (res.status === 503) {
           errorMessage = "Serwer weryfikacji jest tymczasowo niedostępny.";
         } else if (res.status === 404) {
@@ -155,7 +156,9 @@ window.addEventListener("load", () => {
       };
 
       tokenValueContainer.appendChild(tokenValue);
-      tokenValueContainer.appendChild(copyBtn);
+      //NOTE: Copy function does not work as expected after changes in classes
+      // no time for debuging now
+      // tokenValueContainer.appendChild(copyBtn);
       tokenWrapper.appendChild(tokenLabel);
       tokenWrapper.appendChild(tokenValueContainer);
       modalTokenContainer.appendChild(tokenWrapper);

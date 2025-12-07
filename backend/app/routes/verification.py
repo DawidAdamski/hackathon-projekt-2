@@ -1,7 +1,6 @@
-import re
-
 from app.core.logger import logger
 from app.schemas.verification import ScanRequest, VerifySessionRequest
+from app.services.ssl_check import get_cert_info
 from app.services.storage import TokenService, get_token_service
 from app.services.token_generator import generate_nonce_token
 from app.services.validator import is_gov_domain, is_trusted_domain
@@ -70,7 +69,7 @@ async def handle_scan(
 ):
     """
     Endpoint wywoływany przez mObywatel po zeskanowaniu kodu QR.
-    Aktualizuje flagę mobywatel_scan na 1.
+    Aktualizuje flagę mobywatel_scan na 1 i pobiera informacje z certyfikatu SSL.
     """
     nonce = request.nonce
     origin = req.headers.get("host", "")
@@ -82,8 +81,22 @@ async def handle_scan(
     if not token:
         logger.warning(f"Token not found or expired: {nonce}")
         return {"status": "untrusted", "details": "Token nie został znaleziony lub wygasł"}
-    else:
-        return {"status": "trusted", "origin": token["domain"], "details": "Weryfikacja zakończona pomyślnie"}
+
+    # NOTE: Używamy zahardkodowanej domeny z certem dla testu
+    ssl_info = get_cert_info(token["domain"])
+
+    # Jeśli certyfikat nie został znaleziony, traktuj jako niezaufane
+    if not ssl_info:
+        logger.warning(f"SSL certificate not found or invalid for domain: {token['domain']}")
+        return {"status": "untrusted", "details": "Nie można zweryfikować certyfikatu SSL", "origin": token["domain"]}
+
+    # Zwróć status trusted z informacjami SSL
+    return {
+        "status": "trusted",
+        "origin": token["domain"],
+        "details": "Weryfikacja zakończona pomyślnie",
+        "ssl_info": ssl_info,
+    }
 
 
 @router.get("/test")

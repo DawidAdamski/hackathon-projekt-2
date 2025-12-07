@@ -229,6 +229,51 @@ body {
   margin-top: 10px;
 }
 
+/* SSL Info Section */
+.ssl-info-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.ssl-info-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.ssl-info-details {
+  font-size: 13px;
+}
+
+.ssl-info-details p {
+  margin: 8px 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.ssl-info-details strong {
+  color: #333;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 120px;
+}
+
+.ssl-info-details code {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  background: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  word-break: break-all;
+}
+
 /* Token Section */
 .token-section {
   margin-top: auto;

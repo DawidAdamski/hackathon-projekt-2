@@ -77,7 +77,15 @@ window.addEventListener("load", () => {
       });
 
       if (!res.ok) {
-        throw new Error("Błąd HTTP: " + res.status);
+        let errorMessage = `Błąd HTTP: ${res.status}`;
+        if (res.status === 502) {
+          errorMessage = "Nie można połączyć się z serwerem weryfikacji. Sprawdź czy backend jest uruchomiony.";
+        } else if (res.status === 503) {
+          errorMessage = "Serwer weryfikacji jest tymczasowo niedostępny.";
+        } else if (res.status === 404) {
+          errorMessage = "Endpoint weryfikacji nie został znaleziony.";
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await res.json();

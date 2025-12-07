@@ -95,14 +95,14 @@ async function sendVerificationRequest(nonce) {
 
 // Handle Verification Response
 function handleVerificationResponse(data) {
-  const { status, details, origin } = data;
+  const { status, details, origin, ssl_info } = data;
 
   // Show result section
   showResult();
 
   // Update status indicator
   if (status === "trusted") {
-    showSuccessStatus(details, origin);
+    showSuccessStatus(details, origin, ssl_info);
   } else if (status === "untrusted") {
     showErrorStatus(details, origin);
   } else {
@@ -122,15 +122,34 @@ function handleVerificationError(error) {
 }
 
 // Show Success Status
-function showSuccessStatus(details, origin) {
+function showSuccessStatus(details, origin, ssl_info) {
   elements.statusIndicator.className = "status-indicator success";
   elements.statusIndicator.textContent = "✓";
+
+  let sslInfoHtml = "";
+  if (ssl_info) {
+    sslInfoHtml = `
+      <div class="ssl-info-section">
+        <h4>Informacje o certyfikacie SSL:</h4>
+        <div class="ssl-info-details">
+          ${ssl_info.organization ? `<p><strong>Organizacja:</strong> ${escapeHtml(ssl_info.organization)}</p>` : ""}
+          ${ssl_info.common_name ? `<p><strong>Nazwa pospolita:</strong> ${escapeHtml(ssl_info.common_name)}</p>` : ""}
+          ${ssl_info.country ? `<p><strong>Kraj:</strong> ${escapeHtml(ssl_info.country)}</p>` : ""}
+          ${ssl_info.issuer ? `<p><strong>Wystawca:</strong> ${escapeHtml(ssl_info.issuer)}</p>` : ""}
+          ${ssl_info.valid_from ? `<p><strong>Ważny od:</strong> ${escapeHtml(ssl_info.valid_from)}</p>` : ""}
+          ${ssl_info.valid_to ? `<p><strong>Ważny do:</strong> ${escapeHtml(ssl_info.valid_to)}</p>` : ""}
+          ${ssl_info.serial_number ? `<p><strong>Numer seryjny:</strong> <code>${escapeHtml(ssl_info.serial_number)}</code></p>` : ""}
+        </div>
+      </div>
+    `;
+  }
 
   elements.resultDetails.innerHTML = `
         <h3>Weryfikacja zakończona pomyślnie</h3>
         <p><strong>Status:</strong> Strona jest zaufana</p>
         ${origin ? `<p><strong>Domena:</strong> <span class="domain">${escapeHtml(origin)}</span></p>` : ""}
         ${details ? `<p><strong>Szczegóły:</strong> ${escapeHtml(details)}</p>` : ""}
+        ${sslInfoHtml}
     `;
 }
 
